@@ -62,10 +62,8 @@ public class MainActivity extends AppCompatActivity {
             if (!permission.checkPermission()) {
                 permission.requestPermission();
             }
-            else{
-                Intent bIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                startActivityForResult(bIntent, 0);
-            }
+            Intent bIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(bIntent, 0);
         }
 
     }
