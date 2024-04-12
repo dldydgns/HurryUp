@@ -1,13 +1,21 @@
 package com.example.hurryup;
 
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothSocket;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.example.hurryup.support.PermissionSupport;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
@@ -17,11 +25,18 @@ import androidx.navigation.ui.NavigationUI;
 
 import com.example.hurryup.databinding.ActivityMainBinding;
 
+import java.io.IOException;
+import java.util.UUID;
+
 public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
 
     private PermissionSupport permission;
     public BluetoothAdapter mBluetoothAdapter;
+
+
+    // launcher 선언
+    private ActivityResultLauncher<Intent> mStartForResult ;
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -52,9 +67,8 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(getApplicationContext(), "블루투스 미지원 기기입니다.", Toast.LENGTH_LONG).show();
 
             // Safe종료
-            moveTaskToBack(true);
             finish();
-            android.os.Process.killProcess(android.os.Process.myPid());
+            return;
         }
 
         // 블루투스가 비활성화 상태 (기기에 블루투스가 꺼져있음)
@@ -63,8 +77,24 @@ public class MainActivity extends AppCompatActivity {
                 permission.requestPermission();
             }
             Intent bIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(bIntent, 0);
+            //startActivityForResult(bIntent, 0); -> 런처로 대체
+            mStartForResult = registerForActivityResult(
+                    new ActivityResultContracts.StartActivityForResult(),
+                    result -> {
+                        //result.getResultCode()를 통하여 결과값 확인
+                        if(result.getResultCode() == RESULT_OK) {
+                            //ToDo
+                        }
+                        if(result.getResultCode() == RESULT_CANCELED){
+                            // 블루투스 켤때까지 물어봄
+                            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                            mStartForResult.launch(enableBtIntent);
+                        }
+                    }
+            );
+            mStartForResult.launch(bIntent);
         }
+
 
     }
 
