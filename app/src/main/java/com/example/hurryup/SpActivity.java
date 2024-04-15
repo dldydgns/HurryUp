@@ -10,26 +10,16 @@ public class SpActivity extends AppCompatActivity {
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_start);
 
-        moveMain(2);	//2초 후 main activity 로 넘어감
-    }
-
-    private void moveMain(int sec) {
-        new Handler().postDelayed(new Runnable()
-        {
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
             @Override
-            public void run()
-            {
-                //new Intent(현재 context, 이동할 activity)
+            public void run() {
                 Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-
                 startActivity(intent);
-
-
-                finish();	//현재 액티비티 종료
+                finish();
             }
-        }, 1000 * sec); // sec초 정도 딜레이를 준 후 시작
+        },2000); // 1초 있다 스타트 액티비티로
     }
-
-
 }

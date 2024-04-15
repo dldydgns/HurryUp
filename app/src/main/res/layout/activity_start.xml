@@ -23,7 +23,7 @@
     <TextView
         android:layout_width="200dp"
         android:layout_height="90dp"
-        android:fontFamily="@font/KeaniaOne"
+        android:fontFamily="@font/keaniaone"
         android:gravity="center"
         android:text="Hurry Up Cushion"
         android:textSize="17pt"
