@@ -54,6 +54,8 @@ public class MainActivity extends AppCompatActivity {
         }
         pairedDevices = mBluetoothAdapter.getBondedDevices();
 
+        Toast.makeText(MainActivity.this,"123",Toast.LENGTH_SHORT);
+
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("장치 선택");
 
