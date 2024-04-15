@@ -3,8 +3,6 @@ package com.example.hurryup;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -18,11 +16,11 @@ public class SplashActivity extends AppCompatActivity {
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                Intent intent = new Intent(getApplicationContext(),MainActivity.class);
+                Intent intent = new Intent(getApplicationContext(), SpActivity.class);
                 startActivity(intent);
                 finish();
             }
-        },3000); // 3초 있다 메인액티비티로
+        },1000); // 1초 있다 스타트 액티비티로
     }
 
     @Override

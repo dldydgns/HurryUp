@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center"
-    tools:context=".StartActivity">
+    android:backgroundTint="@color/white"
+    tools:context=".SpActivity">
 
     <ImageView
         android:id="@+id/bbb"
