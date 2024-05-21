@@ -6,16 +6,29 @@
     android:layout_height="match_parent"
     android:gravity="center"
     android:backgroundTint="@color/white"
-    tools:context=".SpActivity">
+    tools:context=".SplashActivity">
 
     <ImageView
-        android:id="@+id/bbb"
+        android:id="@+id/splash_gif"
         android:layout_width="250dp"
         android:layout_height="250dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        android:background="@drawable/bad1"/>
+        />
+
+    <TextView
+        android:layout_width="200dp"
+        android:layout_height="90dp"
+        android:fontFamily="@font/keaniaone"
+        android:gravity="center"
+        android:text="Hurry Up Cushion"
+        android:textSize="17pt"
+        app:layout_constraintHorizontal_bias="0.497"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/splash_gif"
+        tools:ignore="MissingConstraints"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -4,8 +4,14 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-public class DashboardViewModel extends ViewModel {
+import com.example.hurryup.database.Converters;
+import com.example.hurryup.database.User;
+import com.example.hurryup.database.UserDB;
+import com.example.hurryup.database.UserRepository;
 
+import java.util.Date;
+
+public class DashboardViewModel extends ViewModel {
     private final MutableLiveData<String> mText;
 
     public DashboardViewModel() {
