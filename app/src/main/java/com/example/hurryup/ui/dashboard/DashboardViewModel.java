@@ -12,14 +12,14 @@ import com.example.hurryup.database.UserRepository;
 import java.util.Date;
 
 public class DashboardViewModel extends ViewModel {
-    private final MutableLiveData<String> mText;
+    private final MutableLiveData<float[]> mPercent;
 
     public DashboardViewModel() {
-        mText = new MutableLiveData<>();
-        mText.setValue("This is dashboard fragment");
+        mPercent = new MutableLiveData<>();
+        mPercent.setValue(new float[]{0});
     }
 
-    public LiveData<String> getText() {
-        return mText;
+    public LiveData<float[]> drawChart() {
+        return mPercent;
     }
 }
