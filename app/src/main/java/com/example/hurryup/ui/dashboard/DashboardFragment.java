@@ -2,6 +2,7 @@ package com.example.hurryup.ui.dashboard;
 
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +12,9 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 
+import com.example.hurryup.database.Converters;
+import com.example.hurryup.database.User;
+import com.example.hurryup.database.UserRepository;
 import com.example.hurryup.databinding.FragmentDashboardBinding;
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.PieChart;
@@ -28,6 +32,7 @@ import com.github.mikephil.charting.formatter.ValueFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 
 public class DashboardFragment extends Fragment {
@@ -43,14 +48,6 @@ public class DashboardFragment extends Fragment {
         binding = FragmentDashboardBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        // LiveData를 관찰하고 데이터가 변경될 때마다 차트 업데이트
-        dashboardViewModel.getPieChartData().observe(getViewLifecycleOwner(), entries -> {
-            this.setupDailyPieChart(binding, entries, 10);
-        });
-        dashboardViewModel.getBarChartData().observe(getViewLifecycleOwner(), entries -> {
-            this.setupWeeklyBarChart(binding, entries, false, 10, 0.75f);
-        });
-
         return root;
     }
 
@@ -65,6 +62,8 @@ public class DashboardFragment extends Fragment {
 
         //색상 설정
         List<Integer> colors = new ArrayList<>();
+
+        Log.d("asd",entries.toString());
 
         // 항목의 총 합 계산
         float sum = 0f;
@@ -102,6 +101,7 @@ public class DashboardFragment extends Fragment {
         // 차트의 상호작용 및 표시 설정
         pieChart.setTouchEnabled(false);
         pieChart.getDescription().setEnabled(false);
+        pieChart.getLegend().setEnabled(false);
     }
 
     private void setupWeeklyBarChart(FragmentDashboardBinding binding, List<BarEntry> entries, boolean showBaseline, float textSize, float barWidth) {
@@ -176,7 +176,18 @@ public class DashboardFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+
+        // LiveData를 관찰하고 데이터가 변경될 때마다 차트 업데이트
+        dashboardViewModel.getPieChartData().observe(getViewLifecycleOwner(), entries -> {
+            // PieChart 업데이트
+            this.setupDailyPieChart(binding, entries, 10);
+        });
+        dashboardViewModel.getBarChartData().observe(getViewLifecycleOwner(), entries -> {
+            // BarChart 업데이트
+            this.setupWeeklyBarChart(binding, entries, false, 10, 0.75f);
+        });
     }
+
 
     @Override
     public void onDestroyView() {

@@ -5,9 +5,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 
-import com.example.hurryup.database.Converters;
-import com.example.hurryup.database.User;
-import com.example.hurryup.database.UserDB;
 import com.example.hurryup.service.BluetoothService;
 import com.example.hurryup.support.PermissionSupport;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -20,8 +17,6 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
 import com.example.hurryup.databinding.ActivityMainBinding;
-
-import java.util.Date;
 
 public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;

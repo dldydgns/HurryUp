@@ -1,21 +1,36 @@
 package com.example.hurryup.ui.dashboard;
 
+import android.app.Application;
+import android.util.Log;
+
+import androidx.annotation.NonNull;
+import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
+import androidx.lifecycle.Observer;
 
+import com.example.hurryup.database.Converters;
+import com.example.hurryup.database.StateCount;
+import com.example.hurryup.database.User;
+import com.example.hurryup.database.UserRepository;
 import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.data.PieEntry;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
-public class DashboardViewModel extends ViewModel {
-
+public class DashboardViewModel extends AndroidViewModel {
+    UserRepository userRepository;
     // PieChart 데이터를 관리하기 위한 MutableLiveData
     private MutableLiveData<List<PieEntry>> pieChartData;
     // BarChart 데이터를 관리하기 위한 MutableLiveData
     private MutableLiveData<List<BarEntry>> barChartData;
+
+    public DashboardViewModel(@NonNull Application application) {
+        super(application);
+        userRepository = new UserRepository(application);
+    }
 
     public LiveData<List<PieEntry>> getPieChartData() {
         if (pieChartData == null) {
@@ -35,38 +50,49 @@ public class DashboardViewModel extends ViewModel {
 
     private void loadPieChartData() {
         // PieChart 데이터를 불러오는 로직을 작성
-        // 예시 데이터 사용
-        List<PieEntry> entries = new ArrayList<>();
-        entries.add(new PieEntry(1,1));
-        entries.add(new PieEntry(2,2));
-        entries.add(new PieEntry(3,3));
-        entries.add(new PieEntry(4,4));
-        entries.add(new PieEntry(5,5));
-        entries.add(new PieEntry(6,6));
-        entries.add(new PieEntry(7,7));
-        pieChartData.setValue(entries);
+        userRepository.getTodayStateCount().observeForever(stateCounts -> {
+            if (stateCounts != null && !stateCounts.isEmpty()) {
+                List<PieEntry> entries = new ArrayList<>();
+                for (StateCount stateCount : stateCounts) {
+                    entries.add(new PieEntry(stateCount.count, stateCount.state));
+                }
+
+                // 라벨 설정
+                for (PieEntry entry : entries) {
+                    switch ((int) entry.getData()) {
+                        case 1: entry.setLabel("좌측 전방"); break;
+                        case 2: entry.setLabel("전방"); break;
+                        case 3: entry.setLabel("우측 전방"); break;
+                        case 4: entry.setLabel("좌측"); break;
+                        case 5: entry.setLabel("정자세"); break;
+                        case 6: entry.setLabel("우측"); break;
+                        case 7: entry.setLabel("좌측 후방"); break;
+                        case 8: entry.setLabel("후방"); break;
+                        case 9: entry.setLabel("우측 후방"); break;
+                        default: break;
+                    }
+                }
+
+                // PieChart 데이터 설정
+                pieChartData.setValue(entries);
+            }
+        });
     }
+
 
     private void loadBarChartData() {
-        // BarChart 데이터를 불러오는 로직을 작성
-        // 예시 데이터 사용
+        long currentTimestamp = Converters.dateToTimestamp(new Date());
         List<BarEntry> entries = new ArrayList<>();
-        entries.add(new BarEntry(1,70));
-        entries.add(new BarEntry(2,40));
-        entries.add(new BarEntry(3,60));
-        entries.add(new BarEntry(4,87));
-        entries.add(new BarEntry(5,42));
-        entries.add(new BarEntry(6,53));
-        entries.add(new BarEntry(7,10));
-        barChartData.setValue(entries);
-    }
 
-    // PieChart 및 BarChart 데이터를 업데이트하는 메서드
-    public void updatePieChartData(List<PieEntry> updatedData) {
-        pieChartData.setValue(updatedData);
-    }
-
-    public void updateBarChartData(List<BarEntry> updatedData) {
-        barChartData.setValue(updatedData);
+        for (int i = 1; i <= 7; i++) {
+            final int dayOfWeek = i;
+            userRepository.getStateCountFromDay(0, currentTimestamp, dayOfWeek).observeForever(count -> {
+                entries.add(new BarEntry(dayOfWeek, count));
+                if (entries.size() == 7) {
+                    // 모든 요일의 데이터를 가져온 후에 BarChartData 업데이트
+                    barChartData.setValue(entries);
+                }
+            });
+        }
     }
 }
