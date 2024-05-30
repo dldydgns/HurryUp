@@ -10,9 +10,9 @@ public class User{
     @PrimaryKey(autoGenerate = true)
     public int id;
     public long timestamp;
-    public int state;
+/*    public int state;
 
     private float x;
-    private  float y;
+    private  float y;*/
 
 }
