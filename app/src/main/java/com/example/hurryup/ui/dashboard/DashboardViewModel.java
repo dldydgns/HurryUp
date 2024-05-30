@@ -39,11 +39,11 @@ public class DashboardViewModel extends AndroidViewModel {
         // Calendar 객체를 사용하여 어제의 시간 구하기
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());
-        calendar.add(Calendar.DATE, -0); // 어제로 이동
+        calendar.add(Calendar.DATE, -5); // 어제로 이동
         Date yesterdayDate = calendar.getTime();
 
         User user = new User();
-        user.state = 2;
+        user.state = 5;
         user.timestamp = Converters.dateToTimestamp(yesterdayDate);
         //userRepository.insert(user);
     }
