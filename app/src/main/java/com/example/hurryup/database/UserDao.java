@@ -21,6 +21,12 @@ public interface UserDao{
     @Query("SELECT state, COUNT(*) AS count FROM User WHERE DATE(timestamp / 1000, 'unixepoch') = DATE('now') GROUP BY state ORDER BY state")
     LiveData<List<StateCount>> getTodayStateCount();
 
-    @Query("SELECT COUNT(id) FROM User WHERE state = :state AND timestamp >= :startOfTime AND timestamp <= :endOfTime")
-    LiveData<Integer> getStateCountFromTime(int state, long startOfTime, long endOfTime);
+    @Query("SELECT strftime('%w', datetime(timestamp / 1000, 'unixepoch')) as day, " +
+            "       (COUNT(CASE WHEN state = :state THEN 1 ELSE NULL END) * 1.0 / " +
+            "       (SELECT COUNT(*) FROM User u2 WHERE strftime('%w', datetime(u2.timestamp / 1000, 'unixepoch')) = strftime('%w', datetime(User.timestamp / 1000, 'unixepoch')))) * 100 AS ratio " +
+            "FROM User " +
+            "GROUP BY day " +
+            "HAVING User.timestamp >= strftime('%s', 'now', '-6 days')" +
+            "ORDER BY day")
+    LiveData<List<DayCount>> getWeekCountByCount(int state);
 }

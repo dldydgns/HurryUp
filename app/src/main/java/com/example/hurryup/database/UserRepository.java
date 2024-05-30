@@ -12,7 +12,7 @@ public class UserRepository {
     private UserDao mUserDao;
 
     private LiveData<List<StateCount>> today_statecount;
-    private LiveData<Integer> week_statecount;
+    private LiveData<List<DayCount>> week_statecount;
 
     // Note that in order to unit test the WordRepository, you have to remove the Application
     // dependency. This adds complexity and much more code, and this sample is not about testing.
@@ -30,38 +30,9 @@ public class UserRepository {
         return today_statecount;
     }
 
-    public LiveData<Integer> getStateCountFromDay(int state, long timestamp, int day) {
-        long startTime = getStartOfDay(timestamp, day); // 해당 날짜의 일요일 시작 시간
-        long endTime = getEndOfDay(timestamp, day); // 해당 날짜의 일요일 끝 시간
-
-        week_statecount = mUserDao.getStateCountFromTime(state, startTime, endTime);
+    public LiveData<List<DayCount>> getWeekCountByCount(int state) {
+        week_statecount = mUserDao.getWeekCountByCount(state);
         return week_statecount;
-    }
-
-    private long getStartOfDay(long timestamp, int day) {
-        Calendar calendar = Calendar.getInstance();
-
-        calendar.setTimeInMillis(timestamp);
-        calendar.set(Calendar.DAY_OF_WEEK, day);
-        calendar.set(Calendar.HOUR_OF_DAY, 0);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
-        calendar.set(Calendar.MILLISECOND, 0);
-
-        return calendar.getTimeInMillis();
-    }
-
-    private long getEndOfDay(long timestamp, int day) {
-        Calendar calendar = Calendar.getInstance();
-
-        calendar.setTimeInMillis(timestamp);
-        calendar.set(Calendar.DAY_OF_WEEK, day);
-        calendar.set(Calendar.HOUR_OF_DAY, 23);
-        calendar.set(Calendar.MINUTE, 59);
-        calendar.set(Calendar.SECOND, 59);
-        calendar.set(Calendar.MILLISECOND, 999);
-
-        return calendar.getTimeInMillis();
     }
 
     // You must call this on a non-UI thread or your app will throw an exception. Room ensures
