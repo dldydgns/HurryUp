@@ -19,6 +19,7 @@
         />
 
     <TextView
+        android:id="@+id/splash_text"
         android:layout_width="200dp"
         android:layout_height="90dp"
         android:fontFamily="@font/keaniaone"

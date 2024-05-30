@@ -11,4 +11,8 @@ public class User{
     public int id;
     public long timestamp;
     public int state;
+
+    private float x;
+    private  float y;
+
 }

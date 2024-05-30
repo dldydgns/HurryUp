@@ -7,4 +7,13 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <color name="green">#009A00</color>
+    <color name="greenline">#00C800</color>
+    <color name="red">#FF1919</color>
+    <color name="redline">#FF3838</color>
+
+    <color name="cushion">#F3DEAC</color>
+    <color name="cushionline">#DDC68E</color>
+
 </resources>
