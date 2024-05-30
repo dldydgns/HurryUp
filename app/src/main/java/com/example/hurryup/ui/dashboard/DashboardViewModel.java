@@ -10,15 +10,20 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
 
 import com.example.hurryup.database.Converters;
+import com.example.hurryup.database.DayCount;
 import com.example.hurryup.database.StateCount;
 import com.example.hurryup.database.User;
 import com.example.hurryup.database.UserRepository;
 import com.github.mikephil.charting.data.BarEntry;
+import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.PieEntry;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Locale;
 
 public class DashboardViewModel extends AndroidViewModel {
     UserRepository userRepository;
@@ -30,6 +35,17 @@ public class DashboardViewModel extends AndroidViewModel {
     public DashboardViewModel(@NonNull Application application) {
         super(application);
         userRepository = new UserRepository(application);
+
+        // Calendar 객체를 사용하여 어제의 시간 구하기
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.add(Calendar.DATE, -5); // 어제로 이동
+        Date yesterdayDate = calendar.getTime();
+
+        User user = new User();
+        user.state = 5;
+        user.timestamp = Converters.dateToTimestamp(yesterdayDate);
+        //userRepository.insert(user);
     }
 
     public LiveData<List<PieEntry>> getPieChartData() {
@@ -81,18 +97,27 @@ public class DashboardViewModel extends AndroidViewModel {
 
 
     private void loadBarChartData() {
-        long currentTimestamp = Converters.dateToTimestamp(new Date());
-        List<BarEntry> entries = new ArrayList<>();
+        // BarChart 데이터를 불러오는 로직을 작성
+        userRepository.getWeekCountByCount(5).observeForever(dayCounts -> {
+            if (dayCounts != null && !dayCounts.isEmpty()) {
+                List<BarEntry> entries = new ArrayList<>();
 
-        for (int i = 1; i <= 7; i++) {
-            final int dayOfWeek = i;
-            userRepository.getStateCountFromDay(0, currentTimestamp, dayOfWeek).observeForever(count -> {
-                entries.add(new BarEntry(dayOfWeek, count));
-                if (entries.size() == 7) {
-                    // 모든 요일의 데이터를 가져온 후에 BarChartData 업데이트
-                    barChartData.setValue(entries);
+                // 일요일~토요일을 1부터 7까지로 표기
+                for(int i=1; i<=7; i++){
+                    boolean found = false;
+                    for (DayCount dayCount : dayCounts) {
+                        if (dayCount.day+1 == i) {
+                            entries.add(new BarEntry(i, dayCount.ratio));
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found) {
+                        entries.add(new BarEntry(i, 0)); // 해당 요일에 데이터가 없으면 0으로 추가
+                    }
                 }
-            });
-        }
+                barChartData.setValue(entries);
+            }
+        });
     }
 }
