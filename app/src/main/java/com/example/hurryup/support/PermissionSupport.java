@@ -2,28 +2,63 @@ package com.example.hurryup.support;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Build;
 
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+
+import com.example.hurryup.service.BluetoothService;
+
+import org.jetbrains.annotations.NotNull;
+
+import java.sql.Array;
+import java.util.ArrayList;
+import java.util.List;
+
 public class PermissionSupport {
-    public static final int BLUETOOTH_PERMISSION_REQUEST_CODE = 1001;
+    private static final String[] permissions = {
+            Manifest.permission.BLUETOOTH,
+            Manifest.permission.BLUETOOTH_ADMIN,
+            Manifest.permission.BLUETOOTH_CONNECT,
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.FOREGROUND_SERVICE,
+            Manifest.permission.FOREGROUND_SERVICE_LOCATION,
+            Manifest.permission.FOREGROUND_SERVICE_DATA_SYNC,
+            Manifest.permission.FOREGROUND_SERVICE_REMOTE_MESSAGING,
+            Manifest.permission.POST_NOTIFICATIONS
+    };
+    private static List<String> permissionList;
+    public static final int PERMISSION_REQUEST_CODE = 1001;
 
-    public static boolean checkBluetoothPermission(Context context) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            int permissionState = context.checkSelfPermission(Manifest.permission.BLUETOOTH);
-            return permissionState == PackageManager.PERMISSION_GRANTED;
-        } else {
-            // 안드로이드 버전이 M 미만인 경우 Bluetooth 권한이 항상 허용된 것으로 간주합니다.
-            return true;
+    public static boolean checkPermission(Context context) {
+        int result;
+        permissionList = new ArrayList<>();
+
+        for(String pm : permissions) {
+            result = ContextCompat.checkSelfPermission(context, pm);
+            if(result != PackageManager.PERMISSION_GRANTED){
+                permissionList.add(pm);
+            }
         }
+        return permissionList.isEmpty();
     }
 
-    public static void requestBluetoothPermission(Activity activity) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            activity.requestPermissions(new String[]{Manifest.permission.BLUETOOTH}, BLUETOOTH_PERMISSION_REQUEST_CODE);
-        }
+    public static void requestPermission(Activity activity) {
+        ActivityCompat.requestPermissions(activity, (String[])permissionList.toArray(new String[permissionList.size()]), PERMISSION_REQUEST_CODE);
     }
 
-    // 다른 권한 확인 및 요청 메서드를 추가할 수 있습니다.
+    public static boolean permissionResult(int requestCode, @NotNull String[] permissions, @NotNull int[] grantResults){
+        if(requestCode == PERMISSION_REQUEST_CODE && (grantResults.length > 0)){
+            for(int grantResult : grantResults){
+                if(grantResult == -1){
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
 }

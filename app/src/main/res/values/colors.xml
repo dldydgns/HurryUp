@@ -15,5 +15,7 @@
 
     <color name="cushion">#F3DEAC</color>
     <color name="cushionline">#DDC68E</color>
+    <color name="cushion_warning">#E34E43</color>
+    <color name="cushionline_warning">#C11B0F</color>
 
 </resources>

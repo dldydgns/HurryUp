@@ -35,17 +35,6 @@ public class DashboardViewModel extends AndroidViewModel {
     public DashboardViewModel(@NonNull Application application) {
         super(application);
         userRepository = new UserRepository(application);
-
-        // Calendar 객체를 사용하여 어제의 시간 구하기
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(new Date());
-        calendar.add(Calendar.DATE, -5); // 어제로 이동
-        Date yesterdayDate = calendar.getTime();
-
-        User user = new User();
-        user.state = 5;
-        user.timestamp = Converters.dateToTimestamp(yesterdayDate);
-        //userRepository.insert(user);
     }
 
     public LiveData<List<PieEntry>> getPieChartData() {
@@ -98,7 +87,7 @@ public class DashboardViewModel extends AndroidViewModel {
 
     private void loadBarChartData() {
         // BarChart 데이터를 불러오는 로직을 작성
-        userRepository.getWeekCountByCount(5).observeForever(dayCounts -> {
+        userRepository.getWeekCountByState(5).observeForever(dayCounts -> {
             if (dayCounts != null && !dayCounts.isEmpty()) {
                 List<BarEntry> entries = new ArrayList<>();
 

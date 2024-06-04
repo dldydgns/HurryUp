@@ -27,5 +27,8 @@ public interface UserDao{
             "WHERE DATE('now','-7 days','start of day') < DATE(timestamp / 1000, 'unixepoch')" +
             "GROUP BY day " +
             "ORDER BY day")
-    LiveData<List<DayCount>> getWeekCountByCount(int state);
+    LiveData<List<DayCount>> getWeekCountByState(int state);
+
+    @Query("SELECT state FROM User ORDER BY timestamp DESC LIMIT 1")
+    LiveData<Integer> getRecentState();
 }

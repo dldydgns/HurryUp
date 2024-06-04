@@ -13,6 +13,7 @@ public class UserRepository {
 
     private LiveData<List<StateCount>> today_statecount;
     private LiveData<List<DayCount>> week_statecount;
+    private LiveData<Integer> recentstate;
 
     // Note that in order to unit test the WordRepository, you have to remove the Application
     // dependency. This adds complexity and much more code, and this sample is not about testing.
@@ -30,9 +31,14 @@ public class UserRepository {
         return today_statecount;
     }
 
-    public LiveData<List<DayCount>> getWeekCountByCount(int state) {
-        week_statecount = mUserDao.getWeekCountByCount(state);
+    public LiveData<List<DayCount>> getWeekCountByState(int state) {
+        week_statecount = mUserDao.getWeekCountByState(state);
         return week_statecount;
+    }
+
+    public LiveData<Integer> getRecentState() {
+        recentstate = mUserDao.getRecentState();
+        return recentstate;
     }
 
     // You must call this on a non-UI thread or your app will throw an exception. Room ensures

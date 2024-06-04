@@ -2,9 +2,17 @@ package com.example.hurryup.service;
 
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.nfc.cardemulation.HostNfcFService;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
+import android.widget.Toast;
 
+import com.example.hurryup.MainActivity;
+import com.example.hurryup.database.Converters;
 import com.example.hurryup.database.User;
 import com.example.hurryup.database.UserRepository;
 import com.example.hurryup.support.PermissionSupport;
@@ -12,6 +20,9 @@ import com.example.hurryup.support.PermissionSupport;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.util.Date;
 import java.util.UUID;
 
 public class BluetoothThread extends Thread {
@@ -19,13 +30,22 @@ public class BluetoothThread extends Thread {
     private InputStream inputStream;
     private OutputStream outputStream;
     private Context context;
+    private Handler mainActivityHandler;
+
+    // 스트레칭 관련 변수들(단위 : 초)
+    private static final int STRETCH_TIME = 5;   // 스트레칭 알람 주기
+    private static final int LEAVING_THRESHOLD = 60;    // 앉아있었다고 판별하는 최소시간
+    private int stretchTimer;
+    private int leavingTimer;
 
     // BluetoothThread.java
-    public BluetoothThread(BluetoothDevice device, UUID uuid, Context context) { // context를 받도록 수정
+    public BluetoothThread(BluetoothDevice device, UUID uuid, Context context, Handler handler) { // context를 받도록 수정
         BluetoothSocket tmp = null;
+        mainActivityHandler = handler;
+
         this.context = context; // context를 초기화
         try {
-            if (PermissionSupport.checkBluetoothPermission(context)) {
+            if (PermissionSupport.checkPermission(context)) {
                 tmp = device.createRfcommSocketToServiceRecord(uuid);
             } else {
                 Log.e("BluetoothThread", "Bluetooth 권한이 없습니다.");
@@ -45,7 +65,7 @@ public class BluetoothThread extends Thread {
 
         try {
             // BluetoothSocket 연결 시도
-            if (PermissionSupport.checkBluetoothPermission(context)) {
+            if (PermissionSupport.checkPermission(context)) {
                 bluetoothSocket.connect();
                 Log.d("BluetoothThread", "BluetoothSocket 연결 성공");
 
@@ -53,7 +73,8 @@ public class BluetoothThread extends Thread {
                 inputStream = bluetoothSocket.getInputStream();
                 outputStream = bluetoothSocket.getOutputStream();
 
-                // 데이터 송수신을 원하는 경우 여기에 코드 추가
+                // 블루투스 연결 성공
+                mainActivityHandler.sendEmptyMessage(1);
                 readData(); // 데이터 수신 메서드 호출
             } else {
                 Log.e("BluetoothThread", "Bluetooth 권한이 없습니다.");
@@ -61,6 +82,7 @@ public class BluetoothThread extends Thread {
         } catch (IOException connectException) {
             // 연결 실패 시 예외 처리
             Log.e("BluetoothThread", "BluetoothSocket 연결 실패", connectException);
+            mainActivityHandler.sendEmptyMessage(-1);
             try {
                 bluetoothSocket.close();
             } catch (IOException closeException) {
@@ -72,10 +94,12 @@ public class BluetoothThread extends Thread {
 
     // 데이터 수신 메서드
     private void readData() {
-        byte[] buffer = new byte[1024]; // 데이터를 읽을 버퍼 크기 설정
+        byte[] buffer = new byte[4]; // 데이터를 읽을 버퍼 크기 설정
         int bytes; // 읽은 바이트 수를 저장할 변수
         UserRepository userRepository = new UserRepository(context); // UserRepository 인스턴스 생성
 
+        stretchTimer = 0;
+        leavingTimer = 0;
         while (true) {
             try {
                 // InputStream에서 데이터 읽기
@@ -83,20 +107,41 @@ public class BluetoothThread extends Thread {
                 // 읽은 데이터 처리
                 if (bytes != -1) {
                     // 읽은 데이터가 있는 경우 처리
-                    String receivedData = new String(buffer, 0, bytes);
-                    Log.d("BluetoothThread", "Received data: " + receivedData);
+                    int receivedState = ByteBuffer.wrap(buffer).order(ByteOrder.LITTLE_ENDIAN).getInt(); // 바이트 배열을 int로 변환
+                    Log.d("BluetoothThread", "Received data: " + receivedState);
 
-                    // 받은 데이터를 처리하고 DB에 저장하는 코드 추가
-                    // 예시: Bluetooth로부터 받은 데이터를 상태 정보로 가정하여 DB에 저장
-                    int receivedState = Integer.parseInt(receivedData);
+                    // 착석중이 아닌경우
+                    if (receivedState == 0) {
+                        // 일어서있는 시간 증가
+                        leavingTimer++;
 
-                    // 데이터를 DB에 저장하기 위한 코드 추가
-                    User user = new User();
-                    user.timestamp = System.currentTimeMillis(); // 현재 시간을 timestamp로 설정
-                    user.state = receivedState;
+                        // LEAVING_THRESHOLD 초 이상 자리를 비우면
+                        if(leavingTimer > LEAVING_THRESHOLD) {
+                            // 어떠한 활동을 했다고 판단하여 타이머 초기화
+                            stretchTimer = 0;
+                            leavingTimer = 0;
+                        }
+                    }
+                    else {
+                        // 데이터를 DB에 저장하기 위한 코드 추가
+                        User user = new User();
+                        user.timestamp = Converters.dateToTimestamp(new Date());
+                        user.state = receivedState;
 
-                    // Room 데이터베이스에 저장
-                    userRepository.insert(user);
+                        // Room 데이터베이스에 저장
+                        userRepository.insert(user);
+
+                        // 앉아있는시간 초기화
+                        leavingTimer = 0;
+                        // 착석시간 증가
+                        stretchTimer++;
+                        // 1시간 이상 착석중인경우
+                        if(stretchTimer > STRETCH_TIME) {
+                            // UI 업데이트 요청
+                            mainActivityHandler.sendEmptyMessage(0);
+                            stretchTimer = 0;
+                        }
+                    }
                 }
             } catch (IOException e) {
                 Log.e("BluetoothThread", "Error reading from InputStream", e);

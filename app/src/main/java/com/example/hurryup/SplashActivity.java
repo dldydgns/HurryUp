@@ -9,6 +9,7 @@ import android.widget.ImageView;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
+import com.example.hurryup.support.PermissionSupport;
 
 public class SplashActivity extends AppCompatActivity {
     @Override
@@ -17,7 +18,7 @@ public class SplashActivity extends AppCompatActivity {
         setContentView(R.layout.activity_splash);
 
         ImageView gif = (ImageView) findViewById(R.id.splash_gif);
-        Glide.with(this).load(R.raw.splash).into(gif);
+        Glide.with(this).load(R.raw.splash2).into(gif);
 
         Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
