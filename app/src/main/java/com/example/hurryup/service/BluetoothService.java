@@ -1,7 +1,5 @@
 package com.example.hurryup.service;
 
-import android.Manifest;
-import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -10,34 +8,23 @@ import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
-import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.os.VibratorManager;
-import android.service.notification.StatusBarNotification;
-import android.util.Log;
-import android.view.Gravity;
 import android.widget.Toast;
 
-import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
-import androidx.core.app.NotificationManagerCompat;
-import androidx.core.content.ContextCompat;
 
 import com.example.hurryup.MainActivity;
 import com.example.hurryup.R;
-import com.example.hurryup.support.PermissionSupport;
 import com.example.hurryup.ui.home.HomeFragment;
 
-import java.util.Set;
 import java.util.UUID;
 
 public class BluetoothService extends Service {
